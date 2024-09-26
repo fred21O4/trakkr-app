@@ -29,7 +29,11 @@ jobs:
 
       - name: Build app
         id: build
-        run: npm run build
+        run: npm run build-no-pack
+
+      - name: "Package app"
+        id: pack
+        run: npm run electron-pack -- --linux appimage --windows
 
       - name: Attest build
         id: attestation
@@ -43,5 +47,6 @@ jobs:
         with:
           files: |
             dist/Trakkr Setup *.exe
+            dist/Trakkr*.AppImage
             ${{ steps.attestation.outputs.bundle-path }}
 
