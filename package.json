@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && npm run electron-pack",
+    "build-no-pack": "vite build",
     "serve": "vite preview",
     "electron-dev": "electron .",
     "electron-pack": "electron-builder --publish=never",
@@ -47,7 +48,6 @@
     "productName": "Trakkr.",
     "npmRebuild": false,
     "files": [
-      "./dist/**/*",
       "./electron/**/*",
       "index.html"
     ],
@@ -55,7 +55,13 @@
       "icon": "./public/icon.ico",
       "target": "nsis"
     },
-    "linux": false,
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "./public/icon.png"
+    },
     "mac": false
   }
 }
