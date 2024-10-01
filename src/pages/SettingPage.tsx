@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import SectionTitle from "../components/SectionTitle/SectionTitle";
 import TabMenu from "../components/TabMenu/TabMenu";
 import Themes from "../components/Themes/Themes";
+import JournalConfig from "../components/JournalConfig/JournalConfig";
 import themeData from "../helpers/themes.json";
 
 function SettingPage() {
     const [menuItems, setMenuItems]: any = useState([
-        { label: 'Themes', active: true }
+        { label: 'Themes', active: true },
+        { label: 'Journal Config', active: false }
     ]);
     const [themes, setThemes]: any = useState({});
 
@@ -24,11 +26,14 @@ function SettingPage() {
 
     return (
         <div className="SettingPage">
-             <SectionTitle title="Settings" />
-             <TabMenu menuItems={menuItems} onClick={onMenuClick} />
-             {showUI('Themes') && (
+            <SectionTitle title="Settings" />
+            <TabMenu menuItems={menuItems} onClick={onMenuClick} />
+            {showUI('Themes') && (
                 <Themes themeData={themes} />
-             )}
+            )}
+            {showUI('Journal Config') && (
+                <JournalConfig />
+            )}
         </div>
     )
 }
