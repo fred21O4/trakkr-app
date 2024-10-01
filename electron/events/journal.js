@@ -1,25 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const ships = require('../data/json/ships.json');
-
+const { getState } = require('../data/state');
 let currentWatcher = null;
 
-function readJournalDir() {
-    return path.join(
-        process.env.HOME || process.env.USERPROFILE || '',
-        'Saved Games',
-        'Frontier Developments',
-        'Elite Dangerous'
-    );
-}
-
-function sortJournal() {
+function sortJournal(journalDir) {
     let journalData = {};
-    const journalDir = readJournalDir();
-    const files = readJournalFiles();
-    const cargoFile = readCargoFile();
+    const files = readJournalFiles(journalDir);
+    const cargoFile = readCargoFile(journalDir);
 
-    
+
     const cargoFileData = fs.readFileSync(path.join(journalDir, cargoFile[0]), 'utf-8');
     const cargoData = JSON.parse(cargoFileData);
 
@@ -38,9 +28,9 @@ function sortJournal() {
                         console.warn('Encountered an empty entry...');
                         return false;
                     }
-                    
+
                     const parsedEntry = JSON.parse(sanitizedEntry);
-    
+
                     if(parsedEntry.event === 'Commander') {
                         return true;
                     }
@@ -120,8 +110,7 @@ function sortJournal() {
     };
 }
 
-function readLastJournalFile() {
-    const journalDir = readJournalDir();
+function readLastJournalFile(journalDir) {
 
     const files = fs.readdirSync(journalDir);
 
@@ -141,9 +130,7 @@ function readLastJournalFile() {
     return lastJournalFile;
 }
 
-function readJournalFiles() {
-    const journalDir = readJournalDir();
-
+function readJournalFiles(journalDir) {
     const files = fs.readdirSync(journalDir);
 
     const oneWeekAgo = new Date();
@@ -160,9 +147,7 @@ function readJournalFiles() {
     return journalFiles;
 }
 
-function readCargoFile() {
-    const journalDir = readJournalDir();
-
+function readCargoFile(journalDir) {
     const files = fs.readdirSync(journalDir);
 
     const oneWeekAgo = new Date();
@@ -197,10 +182,8 @@ function readCargoFile() {
 //     }
 // }
 
-function watchJournalChanges(mainWindow) {
+function watchJournalChanges(mainWindow, journalDir) {
     try {
-        const journalDir = readJournalDir();
-
         // Watch the entire journal directory
         fs.watch(journalDir, (eventType, filename) => {
             if (eventType === 'rename' && filename) {
@@ -215,7 +198,7 @@ function watchJournalChanges(mainWindow) {
         });
 
         // Initially watch the current last journal file
-        const lastJournalFile = readLastJournalFile();
+        const lastJournalFile = readLastJournalFile(journalDir);
         if (lastJournalFile) {
             updateFileWatcher(journalDir, lastJournalFile, mainWindow);
         }
@@ -253,7 +236,6 @@ function updateFileWatcher(journalDir, journalFile, mainWindow) {
 
 module.exports = {
     sortJournal,
-    readJournalDir,
     readJournalFiles,
     readLastJournalFile,
     watchJournalChanges

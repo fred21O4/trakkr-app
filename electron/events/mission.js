@@ -2,11 +2,17 @@ const { sortJournal } = require('./journal');
 const { getState, setState, setCargoState } = require('../data/state');
 
 async function getMissionDetails() {
-    const { journalData } = sortJournal();
+    const state = getState();
+
+    const { journalFolder } = state;
 
     let missionData = {};
-
-    const state = getState();
+    let journalData;
+    try {
+        ({ journalData } = sortJournal(journalFolder));
+    } catch {
+        journalData = [];
+    }
 
     Object.keys(journalData).forEach((key) => {
         const data = journalData[key];
@@ -59,7 +65,7 @@ async function getMissionDetails() {
                 }
             }
         });
-        
+
         const filteredActiveMissions = filterActiveMissions(acceptedMissions, completedMissions, abandonedMissions, failedMissions);
         const allMissionProgressCheck = updateMissionProgress(filteredActiveMissions, cargoDepotMissions);
 
@@ -68,7 +74,7 @@ async function getMissionDetails() {
         missionData[key].info = journalData[key].info;
         missionData[key].cargo = state.cargoData?.[key] || [];
     });
-    
+
     if(missionData) {
         Object.keys(missionData).forEach(key => {
             // Remove any broken FIDs
@@ -76,8 +82,8 @@ async function getMissionDetails() {
                 delete missionData[key];
                 return;
             }
-    
-              // Check if the mission has an active array
+
+            // Check if the mission has an active array
             if (missionData[key].active && Array.isArray(missionData[key].active)) {
                 // Filter out expired missions within the active array
                 missionData[key].active = missionData[key].active.filter(mission => {
