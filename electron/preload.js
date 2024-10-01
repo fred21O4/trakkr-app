@@ -15,5 +15,6 @@ contextBridge.exposeInMainWorld('electron', {
     if (validChannels.includes(channel)) {
       ipcRenderer.removeListener(channel, callback);
     }
-  }
+  },
+  chooseJournalFolder: () => ipcRenderer.invoke('choose-journal')
 });

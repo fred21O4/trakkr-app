@@ -20,6 +20,7 @@ declare global {
       getMissionDetails: () => Promise<any[]>,
       on: (channel: string, callback: Callback) => void,
       removeListener: (channel: string, callback: Callback) => void
+      chooseJournalFolder: () => Promise<{ canceled: boolean, filePaths: string[] }>,
     }
   }
 }

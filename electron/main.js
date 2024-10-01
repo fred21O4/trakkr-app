@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, screen, dialog } = require('electron');
 const { watchJournalChanges } = require('./events/journal');
 const { getMissionDetails } = require('./events/mission');
 const { getConfig, createConfig, updateConfig } = require('./data/config');
@@ -28,6 +28,14 @@ function createSplashScreen() {
     } else {
         splashWindow.loadURL('http://localhost:5173');
     }
+
+    splashWindow.on('ready-to-show', () => {
+        const state = getState();
+    
+        if (!state) {
+            createDefaultState();
+        }
+    });
 
 }
 
@@ -64,7 +72,8 @@ function createWindow() {
 
     mainWindow.on('ready-to-show', () => {
         // Watch journals in realtime updates
-        watchJournalChanges(mainWindow);
+        const state = getState();
+        watchJournalChanges(mainWindow, state.journalFolder);
     });
 
 
@@ -75,12 +84,6 @@ function createWindow() {
 
 app.whenReady().then(() => {
     createSplashScreen();
-
-    const state = getState();
-
-    if (!state) {
-        createDefaultState();
-    }
 
     setTimeout(() => {
         splashWindow.close();
@@ -107,7 +110,16 @@ function createDefaultState(state) {
         setState({
             theme: 'jet',
             commodityConfig: {},
-            activeCommander: {}
+            activeCommander: {
+                active: [],
+                completed: [],
+            },
+            journalFolder: path.join(
+                process.env.HOME || process.env.USERPROFILE || '',
+                'Saved Games',
+                'Frontier Developments',
+                'Elite Dangerous'
+            )
         });
     }
 
@@ -145,3 +157,7 @@ ipcMain.handle('set-state', async (event, data) => {
 ipcMain.handle('get-state', async () => {
     return getState();
 });
+ipcMain.handle('choose-journal', async () => {
+    let dir = dialog.showOpenDialog({ properties: ["openDirectory"] });
+    return dir;
+})
